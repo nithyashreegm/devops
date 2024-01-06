@@ -1,0 +1,36 @@
+#!/bin/bash
+
+SCRIPT_NAME="LOG_BACKUP"
+LOG_FILE='logBackupDaily.log'
+
+function logger(){
+  echo -e "\n[$(date +"%F%T")][${USER}@${HOSTNAME} | ${SCRIPT_NAME}]: $1" >> ${LOG_FILE}
+}
+
+function logInfo(){
+  echo -e "\n[$(date +"%F%T")][INFO]: $1" >> ${LOG_FILE}
+}
+
+logger "=====Starting Log Backup Process====="
+logInfo "===Getting Dates in required format==="
+
+DATE=$(date +%d)
+DATE_TO_TAR=$(date --date="1 day ago" +%F)
+DATE_TO_TAR_2=$(date --date="1 day ago" +%m-%d-%Y)
+DATE_TO_TAR_AL=$(date --date="3 days ago" +%F)
+DATE_TO_TAR_ALF=$(date --date="3 days ago" +%Y-%m-%d)
+DATE_TO_RM_AL=$(date --date="30 days ago" +%Y-%m-%d)
+DATE_TO_RM_SL=$(date --date="30 days ago" +%F)
+
+if [[ $DATE == '01' ]]; then
+  cd /opt/stsuser/HOUSE_KEEPING/LOGS/
+  logInfo "$(pwd)"
+  >logBackupDaily.log
+  >clearDiskSpace.log
+fi
+
+logInfo "===NULLIFYING bin nohup.out FILES FOR ALL APPLICATION==="
+cd /home/School_Management_System/SMS_LOGS/
+logInfo "$(pwd)"
+ls -l sms.log.${DATE_TO_TAR}-* | awk '{print $9}' | xargs -I {} tar -czf sms_{}.tgz {} | xargs rm -rvf
+mv -v sms_${DATE_TO_TAR}.tgz ./gz/backup/SMS_LOGS/
