@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Change directory to the parent directory
+cd ..
+
+echo "Stopping Batch Module...."
+appHome=$(pwd)
+
+# Find and kill the process related to the current directory
+pid=$(ps -Aef | grep "$appHome" | grep -v grep | awk '{print $2}')
+kill -9 $pid
+
+# Check if nohup.out file exists and remove it
+echo "Removing nohup.out file..."
+if [ -f bin/nohup.out ]; then
+    rm bin/nohup.out
+fi
+
+# Get current time in the specified format
+timeNow=$(date +'%Y-%m-%d-%H')
+
+# Restarting the Application
+cd standalone/log/
+cd "${appHome}/bin"
+
+echo "Restarting Application...."
+nohup ./standalone.sh -bmanagement 127.0.0.1 -b 0.0.0.0 &
+sleep 5
